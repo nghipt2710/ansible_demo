@@ -1,0 +1,70 @@
+---
+users:
+  - username: tuanna69
+    use_sudo: yes
+
+  - username: thuannd9
+    use_sudo: yes
+
+  - username: tunx6
+    use_sudo: yes
+
+  - username: huyvt19
+    use_sudo: yes
+
+  - username: lieunn
+    use_sudo: yes
+
+  - username: linhcn3
+    use_sudo: yes
+
+  - username: thanhld15
+    use_sudo: yes
+
+  - username: thanhth22
+    use_sudo: yes
+  
+  - username: nghipt7
+    use_sudo: yes
+package_install_default:
+  - bind-utils
+  - dstat
+  - ethtool
+  - python-devel
+  - gcc
+  - git
+  - htop
+  - iftop
+  - iotop
+  - iperf3
+  - lshw
+  - lsof
+  - make
+  - mlocate
+  - nc
+  - ncdu
+  - net-snmp
+  - net-tools
+  - ntp
+  - ntpdate
+  - pcp-system-tools
+  - rsync
+  - subversion
+  - sysstat
+  - traceroute
+  - tcpdump
+  - telnet
+  - vim
+  - vim-enhanced
+  - wget
+  - xinetd
+  - glances
+  - sipcalc
+  - iptables-services
+service_enable:
+  - network
+  - snmpd
+  - xinetd
+  - sshd
+#  - iptables
+#

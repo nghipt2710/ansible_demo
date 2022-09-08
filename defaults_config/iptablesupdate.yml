@@ -1,0 +1,19 @@
+---
+- hosts: iptables
+  tasks:
+    - name: Check iptables
+      shell: grep -c "^# End API Phisical" /etc/sysconfig/iptables || true
+      register: test_grep  
+    - name: Update iptables
+      lineinfile:
+          path: /etc/sysconfig/iptables
+          insertbefore: '# End API Phisical'
+          line: '-A INPUT -s 103.160.85.68/32 -m   comment --comment "apifci01" -j ACCEPT'
+          state: present
+      when: test_grep.stdout == "1" 
+      notify: Reload iptables 
+  handlers:
+    - name: Reload iptables
+      service:
+        name: iptables
+        state:  reloaded

@@ -1,0 +1,134 @@
+---
+- name: Ensure hostname set
+  hostname:
+    name: "{{ inventory_hostname }}"
+  tags: default
+
+- name: Update selinux, sysctl.conf, litmits for CentOS 7
+  copy:
+    src: "{{ item.source }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+    owner: root
+    group: root
+    backup: yes
+  with_items:
+  - { source: 'templates/selinux.j2', dest: '/etc/selinux/selinux', mode: '0644' }
+  - { source: 'templates/sysctl.conf.j2', dest: '/etc/sysctl.conf', mode: '0644' }
+  - { source: 'templates/iptables.j2', dest: '/etc/sysconfig/iptables', mode: '0600' }
+  - { source: 'templates/sshd_config.j2', dest: '/etc/ssh/sshd_config', mode: '0600' }
+  tags: sysctl
+
+- name: Update sysctl apply
+  shell: |
+    modprobe ip_conntrack
+    sysctl -p
+  ignore_errors: true
+
+- name: Update selinux, sysctl.conf, litmits for CentOS 7
+  copy:
+    src: "{{ item.source }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+    owner: root
+    group: root
+    backup: yes
+  with_items:
+  - { source: 'templates/limits.conf.j2', dest: '/etc/security/limits.conf', mode: '0644' }
+  tags: sysctl
+
+- name: Install repo epel-release
+  yum:
+    name: epel-release
+    state: latest
+    update_cache: yes
+  tags: default
+
+- name: Install some packages
+  yum:
+    name: "{{ package_install_default }}"
+    state: latest
+    update_cache: yes
+  tags: default
+
+- name: Unmask iptables
+  shell: systemctl unmask --now iptables.service
+
+- name: Enabled services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+  - snmpd
+  - xinetd
+  - sshd
+  - ntpd
+  - iptables
+  tags: default
+
+- name: Disabled Firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+  ignore_errors: true
+
+
+- name: Set timezone to Asia/Ho_Chi_Minh
+  shell: timedatectl set-timezone Asia/Ho_Chi_Minh || (mv /etc/localtime /etc/localtime.bak && ln -s /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime)
+  tags: default
+
+- name: Disble selinux
+  replace:
+    dest: '{{ item }}'
+    regexp: '(enforcing|permissive)'
+    replace: 'disabled'
+  with_items:
+    - /etc/sysconfig/selinux
+  tags: default
+
+- name: Create  folder for root
+  file:
+    path: "{{ item.directory }}"
+    state: directory
+    owner: "{{ item.user }}"
+    group: "{{ item.user }}"
+    mode: 0775
+  with_items:
+  - { user: root, directory: /fserver}
+  - { user: root, directory: /fserver/tmp }
+  - { user: root, directory: /fserver/backup }
+  - { user: root, directory: /fserver/projects }
+  - { user: root, directory: /fserver/log }
+  - { user: root, directory: /data/apps }
+  - { user: root, directory: /data/log }
+  tags: default
+
+- name: Add user default for DevOps Team
+  user:
+    name: "{{ item.username }}"
+    shell: /bin/bash
+    createhome: yes
+    comment: 'create with ansible'
+  with_items: '{{users}}'
+  tags: add-key
+
+- name: Setup | authorized key upload
+  authorized_key:
+    user: "{{ item.username }}"
+    state: present
+    key: "{{ lookup('file', 'files/pub_keys/{{ item.username }}.pub') }}"
+    path: '/home/{{ item.username }}/.ssh/authorized_keys'
+  with_items: '{{users}}'
+  tags: add-key
+
+- name: Sudoers | update sudoers file and validate
+  lineinfile: "dest=/etc/sudoers
+    insertafter=EOF
+    line='{{ item.username }} ALL=(ALL) NOPASSWD: ALL'
+    regexp='^{{ item.username }} .*'
+    state=present"
+  with_items: '{{users}}'
+  tags: add-key
+

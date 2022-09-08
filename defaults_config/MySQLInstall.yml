@@ -1,0 +1,27 @@
+---
+- hosts: database
+  tasks:
+        - name: Install Python
+          yum: name=wget state=installed
+        - name: Download lib
+          get_url: url=https://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm dest=/home/nghipt7/mysql-community-release-el7-5.noarch.rpm
+        - name: Install rpm
+          yum: name=/home/nghipt7/mysql-community-release-el7-5.noarch.rpm state=present
+        - name: Update Package
+          yum: name=* state=latest
+        - name: Install mySQL 
+          yum: name=mysql-server state=installed 
+        - name: Start SQL service
+          service: name=mysqld state=restarted
+        - name: Install MySQL-python
+          yum:
+             name: "{{ item }}"
+          loop:
+             - python3-pip
+             - MySQL-python
+        - name: create demo database
+          mysql_db: name=test state=present
+        - name: create demo user
+          mysql_user: name=root password=nghi123 state=present
+        - name: restart sql
+          service: name=mysql state=restarted
