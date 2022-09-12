@@ -1,5 +1,5 @@
 ---
-- hosts: iptables
+- hosts: all
   tasks:
     - name: Check iptables
       shell: grep -c "^# End API Phisical" /etc/sysconfig/iptables || true
