@@ -1,7 +1,7 @@
 ---
 - hosts: all
   tasks:
-        - name: Install Python
+        - name: Install wget
           yum: name=wget state=installed
         - name: Download lib
           get_url: url=https://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm dest=/home/nghipt7/mysql-community-release-el7-5.noarch.rpm
