@@ -13,10 +13,10 @@
     group: root
     backup: yes
   with_items:
-  - { source: 'templates/selinux.j2', dest: '/etc/selinux/selinux', mode: '0644' }
-  - { source: 'templates/sysctl.conf.j2', dest: '/etc/sysctl.conf', mode: '0644' }
-  - { source: 'templates/iptables.j2', dest: '/etc/sysconfig/iptables', mode: '0600' }
-  - { source: 'templates/sshd_config.j2', dest: '/etc/ssh/sshd_config', mode: '0600' }
+  - { source: 'templates/selinux', dest: '/etc/selinux/selinux', mode: '0644' }
+  - { source: 'templates/sysctl.conf', dest: '/etc/sysctl.conf', mode: '0644' }
+  - { source: 'templates/iptables', dest: '/etc/sysconfig/iptables', mode: '0600' }
+  - { source: 'templates/sshd_config', dest: '/etc/ssh/sshd_config', mode: '0600' }
   tags: sysctl
 
 - name: Update sysctl apply
@@ -34,7 +34,7 @@
     group: root
     backup: yes
   with_items:
-  - { source: 'templates/limits.conf.j2', dest: '/etc/security/limits.conf', mode: '0644' }
+  - { source: 'templates/limits.conf', dest: '/etc/security/limits.conf', mode: '0644' }
   tags: sysctl
 
 - name: Install repo epel-release
